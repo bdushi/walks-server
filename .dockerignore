@@ -1,0 +1,14 @@
+.gradle
+.idea
+.vscode
+**/.DS_Store
+
+build
+out
+target
+
+**/*.iml
+
+README.md
+ops/**
+.github/**

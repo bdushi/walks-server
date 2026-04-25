@@ -1,0 +1,38 @@
+services:
+  app:
+    image: ${APP_IMAGE}:${APP_TAG}
+    restart: unless-stopped
+    environment:
+      CONTENTFUL_SPACE_ID: ${CONTENTFUL_SPACE_ID}
+      CONTENTFUL_ACCESS_TOKEN: ${CONTENTFUL_ACCESS_TOKEN}
+      CONTENTFUL_ENVIRONMENT: ${CONTENTFUL_ENVIRONMENT:-master}
+      CONTENTFUL_DEFAULT_LOCALE: ${CONTENTFUL_DEFAULT_LOCALE:-en-US}
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    command: ["/bin/sh", "-c", "while :; do sleep 6h; nginx -s reload; done & nginx -g 'daemon off;'"]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./data/certbot-www:/var/www/certbot
+      - ./data/letsencrypt:/etc/letsencrypt
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+      CERTBOT_EMAIL: ${CERTBOT_EMAIL}
+    volumes:
+      - ./data/certbot-www:/var/www/certbot
+      - ./data/letsencrypt:/etc/letsencrypt
+    entrypoint: sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $$!; done'

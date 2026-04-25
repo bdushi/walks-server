@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+.vscode/
+.gradle/
+.kotlin/
+build/
+
+# Ops runtime data (certs, ACME webroot, etc.)
+ops/data/
