@@ -107,7 +107,27 @@ jobs:
             echo "Missing required secret: ORACLE_HOST" >&2
             exit 1
           fi
-          ssh-keyscan -H "$ORACLE_HOST" >> ~/.ssh/known_hosts
+          case "$ORACLE_HOST" in
+            http://*|https://*|*@*|*/*)
+              echo "ORACLE_HOST must be a plain hostname or IP (example: 203.0.113.10). Do not include user@, protocol, or path." >&2
+              exit 1
+              ;;
+          esac
+
+          # Help debug connectivity issues (NSG/Security List / wrong IP / VM down).
+          if command -v nc >/dev/null 2>&1; then
+            nc -z -w 5 "$ORACLE_HOST" 22 || true
+          fi
+
+          # Populate known_hosts; retry a couple times because keyscan can be flaky on cold hosts.
+          for i in 1 2 3; do
+            if ssh-keyscan -T 10 -H "$ORACLE_HOST" >> ~/.ssh/known_hosts 2>/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Failed to reach $ORACLE_HOST:22 to fetch host key (ssh-keyscan). Check the VM is up, ORACLE_HOST is correct, and port 22 is open in OCI NSG/Security List." >&2
+          exit 1
 
       - name: Upload ops bundle
         env:
