@@ -24,6 +24,52 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Validate OCIR settings
+        env:
+          OCIR_REGISTRY: ${{ secrets.OCIR_REGISTRY }} # e.g. nrq.ocir.io (eu-turin-1 / Italy North)
+          OCIR_USERNAME: ${{ secrets.OCIR_USERNAME }} # must be <tenancy-namespace>/<user>
+          OCIR_PASSWORD: ${{ secrets.OCIR_PASSWORD }} # OCI Auth Token
+          OCIR_REPOSITORY: ${{ secrets.OCIR_REPOSITORY }} # e.g. <tenancy-namespace>/walks-server
+        run: |
+          set -eu
+
+          if [ -z "${OCIR_REGISTRY:-}" ] || [ -z "${OCIR_USERNAME:-}" ] || [ -z "${OCIR_PASSWORD:-}" ] || [ -z "${OCIR_REPOSITORY:-}" ]; then
+            echo "Missing one or more required secrets: OCIR_REGISTRY, OCIR_USERNAME, OCIR_PASSWORD, OCIR_REPOSITORY" >&2
+            exit 1
+          fi
+
+          case "$OCIR_REGISTRY" in
+            *.ocir.io) ;;
+            *)
+              echo "OCIR_REGISTRY must look like <region-key>.ocir.io (example: nrq.ocir.io)" >&2
+              exit 1
+              ;;
+          esac
+
+          case "$OCIR_USERNAME" in
+            */*) ;;
+            *)
+              echo "OCIR_USERNAME must be in the form <tenancy-namespace>/<user> (example: mynamespace/my.user)" >&2
+              exit 1
+              ;;
+          esac
+
+          case "$OCIR_REPOSITORY" in
+            */*) ;;
+            *)
+              echo "OCIR_REPOSITORY must be in the form <tenancy-namespace>/<repo> (example: mynamespace/walks-server)" >&2
+              exit 1
+              ;;
+          esac
+
+          ns_user="${OCIR_USERNAME%%/*}"
+          ns_repo="${OCIR_REPOSITORY%%/*}"
+          if [ "$ns_user" != "$ns_repo" ]; then
+            echo "Namespace mismatch: OCIR_USERNAME starts with '$ns_user' but OCIR_REPOSITORY starts with '$ns_repo'." >&2
+            echo "For OCIR, both must use your tenancy namespace (often not the same as the tenancy display name)." >&2
+            exit 1
+          fi
+
       - name: Login to OCIR
         env:
           OCIR_REGISTRY: ${{ secrets.OCIR_REGISTRY }} # e.g. nrq.ocir.io (eu-turin-1 / Italy North)
