@@ -178,16 +178,21 @@ jobs:
             "docker login \"$OCIR_REGISTRY\" -u \"$OCIR_USERNAME\" --password-stdin"
 
           # Deploy the stack on the VM.
-          ssh "${ORACLE_USER}@${ORACLE_HOST}" "set -eu
-            sudo mkdir -p /opt/walks-server
-            sudo mkdir -p /opt/walks-server/ops/data/letsencrypt /opt/walks-server/ops/data/certbot-www
-            if [ ! -f /opt/walks-server/.env ]; then
-              echo 'Missing /opt/walks-server/.env on server. Create it from ops/.env.example.' >&2
-              exit 1
-            fi
-            set -a; . /opt/walks-server/.env; set +a
-            cd /opt/walks-server/ops
-            # Ensure nginx can start even before the first real Let's Encrypt issuance.
+	          ssh "${ORACLE_USER}@${ORACLE_HOST}" "set -eu
+	            sudo mkdir -p /opt/walks-server
+	            sudo mkdir -p /opt/walks-server/ops/data/letsencrypt /opt/walks-server/ops/data/certbot-www
+	            if [ ! -f /opt/walks-server/.env ]; then
+	              echo 'Missing /opt/walks-server/.env on server.' >&2
+	              echo 'On the VM, create it from the uploaded template:' >&2
+	              echo '  sudo mkdir -p /opt/walks-server' >&2
+	              echo '  sudo cp /opt/walks-server/ops/.env.example /opt/walks-server/.env' >&2
+	              echo '  sudo nano /opt/walks-server/.env' >&2
+	              echo 'Then set at least: DOMAIN, CERTBOT_EMAIL, CONTENTFUL_SPACE_ID, CONTENTFUL_ACCESS_TOKEN.' >&2
+	              exit 1
+	            fi
+	            set -a; . /opt/walks-server/.env; set +a
+	            cd /opt/walks-server/ops
+	            # Ensure nginx can start even before the first real Let's Encrypt issuance.
             if ! test -f \"/opt/walks-server/ops/data/letsencrypt/live/\$DOMAIN/fullchain.pem\"; then
               docker run --rm -v /opt/walks-server/ops/data/letsencrypt:/etc/letsencrypt alpine:3.20 sh -c \"
                 set -eu
