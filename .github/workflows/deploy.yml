@@ -134,8 +134,29 @@ jobs:
           ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
           ORACLE_USER: ${{ secrets.ORACLE_USER }}
         run: |
-          ssh "${ORACLE_USER}@${ORACLE_HOST}" "mkdir -p /opt/walks-server/ops"
-          scp -r ops/. "${ORACLE_USER}@${ORACLE_HOST}:/opt/walks-server/ops/"
+          set -eu
+
+          # Upload into a user-writable staging dir, then promote into /opt with sudo.
+          # This avoids requiring ORACLE_USER to own /opt/walks-server/ops.
+          REMOTE_STAGING="/tmp/walks-server-ops-${GITHUB_SHA}"
+
+          ssh "${ORACLE_USER}@${ORACLE_HOST}" "set -eu
+            sudo -n true >/dev/null 2>&1 || { echo 'ORACLE_USER must have passwordless sudo for deployment.' >&2; exit 1; }
+            rm -rf \"$REMOTE_STAGING\"
+            mkdir -p \"$REMOTE_STAGING\"
+          "
+
+          scp -r ops/. "${ORACLE_USER}@${ORACLE_HOST}:${REMOTE_STAGING}/"
+
+          ssh "${ORACLE_USER}@${ORACLE_HOST}" "set -eu
+            sudo mkdir -p /opt/walks-server/ops
+            if command -v rsync >/dev/null 2>&1; then
+              sudo rsync -a --no-owner --no-group \"$REMOTE_STAGING\"/ /opt/walks-server/ops/
+            else
+              sudo cp -r \"$REMOTE_STAGING\"/. /opt/walks-server/ops/
+            fi
+            rm -rf \"$REMOTE_STAGING\"
+          "
 
       - name: Deploy on VM
         env:
@@ -158,8 +179,8 @@ jobs:
 
           # Deploy the stack on the VM.
           ssh "${ORACLE_USER}@${ORACLE_HOST}" "set -eu
-            mkdir -p /opt/walks-server
-            mkdir -p /opt/walks-server/ops/data/letsencrypt /opt/walks-server/ops/data/certbot-www
+            sudo mkdir -p /opt/walks-server
+            sudo mkdir -p /opt/walks-server/ops/data/letsencrypt /opt/walks-server/ops/data/certbot-www
             if [ ! -f /opt/walks-server/.env ]; then
               echo 'Missing /opt/walks-server/.env on server. Create it from ops/.env.example.' >&2
               exit 1
