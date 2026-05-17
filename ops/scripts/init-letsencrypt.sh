@@ -1,6 +1,19 @@
 #!/usr/bin/env sh
 set -eu
 
+if ! command -v docker >/dev/null 2>&1; then
+  echo "docker is not installed (or not in PATH)." >&2
+  exit 1
+fi
+
+# Some VMs require root access to the Docker socket. Prefer plain docker, fall back to sudo.
+docker_cmd() { docker "$@"; }
+if ! docker ps >/dev/null 2>&1; then
+  if command -v sudo >/dev/null 2>&1; then
+    docker_cmd() { sudo docker "$@"; }
+  fi
+fi
+
 if [ "${1:-}" = "" ]; then
   echo "Usage: ops/scripts/init-letsencrypt.sh /absolute/path/to/.env"
   exit 1
@@ -28,7 +41,7 @@ WEBROOT_DIR="$ROOT_DIR/data/certbot-www"
 mkdir -p "$LE_DIR" "$WEBROOT_DIR"
 
 echo "Creating a temporary self-signed cert so nginx can start..."
-docker run --rm -v "$LE_DIR:/etc/letsencrypt" alpine:3.20 sh -c "
+docker_cmd run --rm -v "$LE_DIR:/etc/letsencrypt" alpine:3.20 sh -c "
   set -eu
   apk add --no-cache openssl >/dev/null
   mkdir -p /etc/letsencrypt/live/$DOMAIN
@@ -41,16 +54,16 @@ docker run --rm -v "$LE_DIR:/etc/letsencrypt" alpine:3.20 sh -c "
 "
 
 echo "Starting nginx to answer ACME challenges..."
-docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" up -d nginx
+docker_cmd compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" up -d nginx
 
 echo "Requesting certificate for $DOMAIN..."
-docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" run --rm certbot \
+docker_cmd compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" run --rm certbot \
   certonly --webroot -w /var/www/certbot \
   -d "$DOMAIN" \
   --email "$CERTBOT_EMAIL" \
   --agree-tos --no-eff-email
 
 echo "Reloading nginx with HTTPS..."
-docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" up -d --force-recreate nginx
+docker_cmd compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" up -d --force-recreate nginx
 
 echo "Certificate ready."
