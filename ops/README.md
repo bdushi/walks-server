@@ -100,6 +100,8 @@ Common issues:
     ```sh
     sudo docker compose -f docker-compose.prod.yml --env-file /opt/walks-server/.env up -d --force-recreate nginx
     ```
+- If `walks.conf` is not generated under `/etc/nginx/conf.d` inside the container, check that the nginx service does not override `command:`.
+  - The nginx image only runs its `/docker-entrypoint.d` scripts (including template rendering) when the container command starts with `nginx`.
 - HTTPS connection refused: port `443` is blocked in OCI NSG/Security List, or the stack is not bound to 443.
   - Check listeners:
     ```sh
