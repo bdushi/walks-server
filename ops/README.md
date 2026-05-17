@@ -94,7 +94,9 @@ sudo docker compose -f docker-compose.prod.yml --env-file /opt/walks-server/.env
 Common issues:
 
 - HTTP works but you see "Welcome to nginx!": nginx is serving the stock default config, not the rendered template.
-  - Ensure `/opt/walks-server/ops/nginx/templates/walks.conf.template` exists on the VM, then:
+  - Ensure `/opt/walks-server/ops/nginx/templates/walks.conf.template` exists on the VM.
+  - Ensure `/opt/walks-server/ops/nginx/templates/default.conf.template` is NOT present (legacy file name that won't override nginx's baked-in default).
+  - Then:
     ```sh
     sudo docker compose -f docker-compose.prod.yml --env-file /opt/walks-server/.env up -d --force-recreate nginx
     ```

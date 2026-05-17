@@ -156,6 +156,10 @@ jobs:
             else
               sudo cp -r \"$REMOTE_STAGING\"/. /opt/walks-server/ops/
             fi
+            # Backward-compat: older deploys left nginx's stock template name in place.
+            # We intentionally do not ship that file anymore because it won't overwrite
+            # the image's baked-in /etc/nginx/conf.d/default.conf.
+            sudo rm -f /opt/walks-server/ops/nginx/templates/default.conf.template
             rm -rf \"$REMOTE_STAGING\"
           "
 
