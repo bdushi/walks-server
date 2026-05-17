@@ -216,7 +216,7 @@ jobs:
 
           # Login to OCIR on the VM. Pass the auth token via stdin so we don't fight shell quoting.
           printf '%s' "$OCIR_PASSWORD" | ssh "${ORACLE_USER}@${ORACLE_HOST}" \
-            "docker login \"$OCIR_REGISTRY\" -u \"$OCIR_USERNAME\" --password-stdin"
+            "sudo docker login \"$OCIR_REGISTRY\" -u \"$OCIR_USERNAME\" --password-stdin"
 
           # Deploy the stack on the VM.
           ssh "${ORACLE_USER}@${ORACLE_HOST}" "set -eu
@@ -235,7 +235,7 @@ jobs:
             cd /opt/walks-server/ops
             # Ensure nginx can start even before the first real Let's Encrypt issuance.
             if ! test -f \"/opt/walks-server/ops/data/letsencrypt/live/\$DOMAIN/fullchain.pem\"; then
-              docker run --rm -v /opt/walks-server/ops/data/letsencrypt:/etc/letsencrypt alpine:3.20 sh -c \"
+              sudo docker run --rm -v /opt/walks-server/ops/data/letsencrypt:/etc/letsencrypt alpine:3.20 sh -c \"
                 set -eu
                 apk add --no-cache openssl >/dev/null
                 mkdir -p /etc/letsencrypt/live/\$DOMAIN
@@ -245,6 +245,6 @@ jobs:
                   -subj /CN=\$DOMAIN >/dev/null 2>&1
               \"
             fi
-            APP_IMAGE=\"$IMAGE\" APP_TAG=\"$GITHUB_SHA\" docker compose -f docker-compose.prod.yml --env-file /opt/walks-server/.env pull
-            APP_IMAGE=\"$IMAGE\" APP_TAG=\"$GITHUB_SHA\" docker compose -f docker-compose.prod.yml --env-file /opt/walks-server/.env up -d --remove-orphans
+            sudo APP_IMAGE=\"$IMAGE\" APP_TAG=\"$GITHUB_SHA\" docker compose -f docker-compose.prod.yml --env-file /opt/walks-server/.env pull
+            sudo APP_IMAGE=\"$IMAGE\" APP_TAG=\"$GITHUB_SHA\" docker compose -f docker-compose.prod.yml --env-file /opt/walks-server/.env up -d --remove-orphans
           "
