@@ -15,17 +15,20 @@ services:
     restart: unless-stopped
     depends_on:
       - app
-    command: ["/bin/sh", "-c", "while :; do sleep 6h; nginx -s reload; done & nginx -g 'daemon off;'"]
+    entrypoint: ["/bin/sh", "-c"]
+    # Render our template to /etc/nginx/conf.d, remove the baked-in default, then run nginx.
+    # This avoids relying on image-specific envsubst behavior.
+    command: >
+      set -eu;
+      envsubst '${DOMAIN}' < /etc/nginx/templates/walks.conf.template > /etc/nginx/conf.d/walks.conf;
+      rm -f /etc/nginx/conf.d/default.conf;
+      while :; do sleep 6h; nginx -s reload; done &
+      exec nginx -g 'daemon off;'
     ports:
       - "80:80"
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN}
-      # Be explicit: render /etc/nginx/templates/*.template -> /etc/nginx/conf.d/*.conf
-      # Some nginx image variants won't overwrite the baked-in default.conf; our template file name is non-default.
-      NGINX_ENVSUBST_TEMPLATE_DIR: /etc/nginx/templates
-      NGINX_ENVSUBST_TEMPLATE_SUFFIX: .template
-      NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx/conf.d
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./data/certbot-www:/var/www/certbot
