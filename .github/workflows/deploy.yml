@@ -163,6 +163,14 @@ jobs:
             rm -rf \"$REMOTE_STAGING\"
           "
 
+      - name: Fix entrypoint script permissions
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+        run: |
+          ssh "${ORACLE_USER}@${ORACLE_HOST}" \
+            "sudo chmod +x /opt/walks-server/ops/nginx/docker-entrypoint.d/*.sh"
+
       - name: Ensure server .env exists
         env:
           ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
