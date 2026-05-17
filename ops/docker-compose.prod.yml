@@ -21,6 +21,11 @@ services:
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN}
+      # Be explicit: render /etc/nginx/templates/*.template -> /etc/nginx/conf.d/*.conf
+      # Some nginx image variants won't overwrite the baked-in default.conf; our template file name is non-default.
+      NGINX_ENVSUBST_TEMPLATE_DIR: /etc/nginx/templates
+      NGINX_ENVSUBST_TEMPLATE_SUFFIX: .template
+      NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx/conf.d
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
       - ./data/certbot-www:/var/www/certbot
