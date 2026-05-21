@@ -11,5 +11,6 @@ data class ContentfulProperties(
     val defaultLocale: String = "en-US"
 ) {
     fun locale(): String = defaultLocale
+    // https://graphql.contentful.com/content/v1/spaces/<space-id>/environments/<env>
     fun graphqlBaseUrl() = "$graphqlUrl$spaceId/environments/$environment"
 }

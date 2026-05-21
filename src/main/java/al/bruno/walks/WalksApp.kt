@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.EnableCaching
 @EnableCaching
 @SpringBootApplication
 @ConfigurationPropertiesScan
+//@EnableConfigurationProperties(ContentfulProperties::class)
 class WalksApp
 
 fun main(args: Array<String>) {
