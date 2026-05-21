@@ -12,3 +12,4 @@ ops/data/
 .env
 ops/.env
 /build/
+/.gradle/
