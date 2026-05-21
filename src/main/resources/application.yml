@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: optional:file:./.env[.properties]
+#    import: optional:file:.env[.properties],optional:file:ops/.env[.properties]
   application:
     name: contentful-proxy
   graphql:
@@ -9,11 +12,10 @@ spring:
     type: caffeine
 
 contentful:
-#  graphql-url: https://graphql.contentful.com/content/v1/spaces/master
-  graphql-url: https://graphql.contentful.com/content/v1/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENVIRONMENT}
-#  graphql-url: https://graphql.contentful.com/content/v1/spaces/${CONTENTFUL_SPACE_ID}
-  space-id: ${CONTENTFUL_SPACE_ID}
-  access-token: ${CONTENTFUL_ACCESS_TOKEN}
+#  graphql-url: https://graphql.contentful.com/content/v1/spaces/<space-id>/environments/<env>
+  graphql-url: ${CONTENTFUL_GRAPHQL_URL:}
+  space-id: ${CONTENTFUL_SPACE_ID:}
+  access-token: ${CONTENTFUL_ACCESS_TOKEN:}
   environment: ${CONTENTFUL_ENVIRONMENT:master}
   default-locale: ${CONTENTFUL_DEFAULT_LOCALE:en-US}
 

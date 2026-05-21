@@ -38,6 +38,9 @@ export CONTENTFUL_ENVIRONMENT=master          # optional, default: master
 export CONTENTFUL_DEFAULT_LOCALE=en-US        # optional, default: en-US
 ```
 
+Alternative for local runs: use either project-root `.env` or `ops/.env` (you already have `ops/.env.example`).  
+`application.yml` imports both locations automatically via `spring.config.import`.
+
 ## Local Development (Gradle)
 
 Run:
