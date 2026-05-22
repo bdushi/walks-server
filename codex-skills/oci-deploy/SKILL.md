@@ -12,7 +12,7 @@ description: Use for deploying this repo to an Oracle Cloud (OCI) VM using Docke
 - First HTTPS issuance: `ops/scripts/init-letsencrypt.sh`
 - Deploy/update: `ops/scripts/remote-deploy.sh`
 - CI/CD: `.github/workflows/deploy.yml`
-- Terraform provisioning: `ops/terraform`
+- Terraform provisioning: `walks-infra/terraform` (separate repo, source of truth)
 
 ## VM assumptions
 
@@ -26,6 +26,7 @@ description: Use for deploying this repo to an Oracle Cloud (OCI) VM using Docke
 
 1. Ensure `/opt/walks-server/.env` exists and includes at least:
    - `DOMAIN`, `CERTBOT_EMAIL`, `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`
+   - Optional: `CONTENTFUL_GRAPHQL_URL`
 2. Upload/update `/opt/walks-server/ops` from the repo `ops/` (or via CI).
 3. If this is the first time on this domain:
    - Run: `cd /opt/walks-server/ops && ./scripts/init-letsencrypt.sh /opt/walks-server/.env`

@@ -9,7 +9,7 @@ build/
 ops/data/
 
 # Local env files (never commit secrets)
-.env
 ops/.env
 /build/
 /.gradle/
+/.idea/

@@ -1,6 +1,6 @@
 # TODO: Manual Setup Checklist
 
-This repo contains Docker + Nginx HTTPS + CI/CD + optional Terraform, but there are still steps you must do yourself (mostly credentials, DNS, and cloud account setup).
+This repo contains Docker + Nginx HTTPS + CI/CD for app deployment, but there are still steps you must do yourself (mostly credentials, DNS, and cloud account setup).
 
 ## 1) Choose Your Container Registry (OCIR vs GHCR)
 
@@ -74,6 +74,7 @@ If using OCIR:
 - App/runtime secrets used to create `/opt/walks-server/.env` on the VM (one-time):
   - `WALKS_DOMAIN`
   - `WALKS_CERTBOT_EMAIL`
+  - `WALKS_CONTENTFUL_GRAPHQL_URL` (optional; defaults to Contentful GraphQL base URL)
   - `WALKS_CONTENTFUL_SPACE_ID`
   - `WALKS_CONTENTFUL_ACCESS_TOKEN`
 
@@ -117,31 +118,16 @@ Manual tasks:
 1. Create/manage `CONTENTFUL_SPACE_ID` and `CONTENTFUL_ACCESS_TOKEN`.
 2. Keep them out of git.
 3. Put them in `/opt/walks-server/.env` on the VM.
+4. Optional override: set `CONTENTFUL_GRAPHQL_URL` (default is `https://graphql.contentful.com/content/v1/spaces/`).
 
-## 7) (Optional) Terraform: “No OCI Clicking”
+## 7) Infrastructure Source of Truth: `walks-infra`
 
-Terraform stack: `ops/terraform`
+Terraform ownership moved to the `walks-infra` repo (stack path: `walks-infra/terraform`).
 
-Manual tasks on your laptop:
-1. Install Terraform.
-   - If you do not want Terraform on your laptop: you can run Terraform via CI (GitHub Actions), but you still must:
-     - provide OCI credentials as GitHub secrets, and
-     - configure a remote state backend (recommended) so state is persisted between runs.
-2. Configure OCI credentials (`~/.oci/config` or env vars).
-3. Fill `ops/terraform/terraform.tfvars`.
-4. Run:
-   - `terraform init`
-   - `terraform apply`
-
-CI/CD note:
-- Yes, `terraform apply` can be run in CI, but do not use ephemeral local state on GitHub runners.
-- If you want this, tell me which backend you prefer for Terraform state:
-  - Terraform Cloud, or
-  - OCI Object Storage bucket (recommended if you want to stay inside OCI).
-
-Important:
-- If you use dockerized Nginx+Certbot from `ops/docker-compose.prod.yml`, keep `install_host_nginx_certbot=false` in Terraform to avoid port conflicts on `80/443`. -> oky do it please
-  - This repo already defaults `install_host_nginx_certbot=false` in `ops/terraform/variables.tf` and in `terraform.tfvars.example`.
+Manual tasks:
+1. Configure and run infra from `walks-infra` (prefer its Terraform Plan/Apply GitHub workflows).
+2. Use the resulting VM `public_ip` output as `ORACLE_HOST` in this repo’s GitHub secrets.
+3. Keep host-level nginx/certbot disabled in infra when using this repo’s dockerized nginx/certbot stack.
 
 ## Next Decision Needed
 

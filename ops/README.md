@@ -10,6 +10,7 @@ The nginx config is generated from `ops/nginx/templates/walks.conf.template` at 
 
 ## 1) Provision an OCI VM
 
+- Source of truth: provision infrastructure from the `walks-infra` repo (`terraform/`).
 - Create an OCI Compute instance (AMD64 or ARM64).
 - Open inbound ports `80` and `443` in Security Lists/NSGs.
 - Point your domain `A` record to the VM public IP.
@@ -28,6 +29,7 @@ The GitHub Actions workflow creates `/opt/walks-server/.env` on the VM if it doe
 
 - `WALKS_DOMAIN`
 - `WALKS_CERTBOT_EMAIL`
+- `WALKS_CONTENTFUL_GRAPHQL_URL` (optional, defaults to Contentful GraphQL base URL)
 - `WALKS_CONTENTFUL_SPACE_ID`
 - `WALKS_CONTENTFUL_ACCESS_TOKEN`
 
@@ -68,6 +70,7 @@ Required GitHub secrets:
 - `ORACLE_SSH_PRIVATE_KEY` (private key contents for SSH)
 - `WALKS_DOMAIN` (example: `api.example.com`)
 - `WALKS_CERTBOT_EMAIL` (example: `admin@example.com`)
+- `WALKS_CONTENTFUL_GRAPHQL_URL` (optional)
 - `WALKS_CONTENTFUL_SPACE_ID`
 - `WALKS_CONTENTFUL_ACCESS_TOKEN`
 

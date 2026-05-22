@@ -20,6 +20,7 @@ description: Use for doing a fast release readiness pass for this repo (Gradle b
 ## Production sanity checks
 
 - `.env` includes `DOMAIN`, `CERTBOT_EMAIL`, and Contentful env vars
+- `ORACLE_HOST` in `walks-server` secrets matches the current `public_ip` from `walks-infra` Terraform output
 - Ports open on VM: `80/443`
 - No host-level nginx bound to `80/443` if using dockerized nginx
 - `ops/scripts/init-letsencrypt.sh` has been run once for the domain

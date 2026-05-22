@@ -177,6 +177,7 @@ jobs:
           ORACLE_USER: ${{ secrets.ORACLE_USER }}
           WALKS_DOMAIN: ${{ secrets.WALKS_DOMAIN }}
           WALKS_CERTBOT_EMAIL: ${{ secrets.WALKS_CERTBOT_EMAIL }}
+          WALKS_CONTENTFUL_GRAPHQL_URL: ${{ secrets.WALKS_CONTENTFUL_GRAPHQL_URL }}
           WALKS_CONTENTFUL_SPACE_ID: ${{ secrets.WALKS_CONTENTFUL_SPACE_ID }}
           WALKS_CONTENTFUL_ACCESS_TOKEN: ${{ secrets.WALKS_CONTENTFUL_ACCESS_TOKEN }}
         run: |
@@ -203,6 +204,7 @@ jobs:
 
           # Write the env file without echoing secrets back into logs.
           {
+            printf 'CONTENTFUL_GRAPHQL_URL=%s\n' "${WALKS_CONTENTFUL_GRAPHQL_URL:-https://graphql.contentful.com/content/v1/spaces/}"
             printf 'CONTENTFUL_SPACE_ID=%s\n' "$WALKS_CONTENTFUL_SPACE_ID"
             printf 'CONTENTFUL_ACCESS_TOKEN=%s\n' "$WALKS_CONTENTFUL_ACCESS_TOKEN"
             printf 'CONTENTFUL_ENVIRONMENT=master\n'

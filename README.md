@@ -32,6 +32,7 @@ Client ──► Spring Boot Proxy ──► Contentful GraphQL API
 Environment variables (see `src/main/resources/application.yml`):
 
 ```sh
+export CONTENTFUL_GRAPHQL_URL=https://graphql.contentful.com/content/v1/spaces/  # optional, default shown
 export CONTENTFUL_SPACE_ID=your_space_id
 export CONTENTFUL_ACCESS_TOKEN=your_access_token
 export CONTENTFUL_ENVIRONMENT=master          # optional, default: master
@@ -115,24 +116,24 @@ On each push to `main`, it:
 
 Required GitHub secrets are listed in `ops/README.md`.
 
-## Terraform (No OCI Console Clicking)
+## Infrastructure Ownership
 
-Terraform stack: `ops/terraform`
+Infrastructure is owned by the `walks-infra` repo (Terraform source of truth).
 
-It can provision:
+Use `walks-infra/terraform` for:
 
-- Always Free ARM VM (`VM.Standard.A1.Flex`)
-- VCN + subnet + internet gateway + routes + security rules (22/80/443)
-- Cloud-init bootstrap: Docker/Compose/Git/UFW (+ optional host nginx/certbot, optional Java)
+- OCI networking (VCN/subnet/route/security rules)
+- VM provisioning/bootstrap
+- Terraform state/workflows
 
-See `ops/terraform/README.md`.
+This `walks-server` repo only owns app/runtime deploy assets (`ops/`, Docker image, and `.github/workflows/deploy.yml`).
 
 ## Codex Skills (Optional)
 
 This repo includes repo-local Codex skills under `codex-skills/` (so you can reuse the same workflows while working in this project):
 
 - `oci-deploy`
-- `terraform-oci`
+- `terraform-oci` (redirects infra work to `walks-infra`)
 - `release-checks`
 
 If you want these installed into your Codex skills directory, tell me what your Codex setup expects (or paste your preferred skills location) and I’ll wire up an install command/flow.

@@ -1,44 +1,25 @@
 ---
 name: terraform-oci
-description: Use for provisioning and managing OCI infrastructure for this repo using ops/terraform (VCN, subnet, IGW, Always Free ARM VM, security rules, cloud-init bootstrap).
+description: Use for OCI Terraform work for walks by delegating infrastructure changes to the separate walks-infra repo (source of truth).
 ---
 
-# Terraform: OCI (walks-server)
+# Terraform: OCI (redirect from walks-server)
 
-## Location
+This repo no longer owns Terraform infrastructure code.
 
-- Terraform stack: `ops/terraform`
+## Source of truth
 
-## Typical commands
+- Repo: `walks-infra`
+- Stack path: `walks-infra/terraform`
+- CI workflows: `walks-infra/.github/workflows/terraform-plan.yml` and `terraform-apply.yml`
 
-From repo root:
+## Standard handoff from infra to app deploy
 
-```sh
-cd ops/terraform
-cp terraform.tfvars.example terraform.tfvars
-terraform init
-terraform plan
-terraform apply
-```
+1. Run Terraform in `walks-infra` and capture `public_ip`.
+2. Set `ORACLE_HOST=<public_ip>` in `walks-server` GitHub secrets.
+3. Deploy app from `walks-server` CI (`.github/workflows/deploy.yml`).
 
-Destroy:
+## Boundary rule
 
-```sh
-terraform destroy
-```
-
-## Key variables
-
-- `compartment_ocid`, `region`, `ssh_public_key`, `domain`
-- Compute: `shape` (default `VM.Standard.A1.Flex`), `ocpus`, `memory_in_gbs`
-- Optional:
-  - `image_ocid` to pin a specific image (prevents unexpected instance replacement later)
-  - `install_host_nginx_certbot` (not recommended if using dockerized nginx in `ops/docker-compose.prod.yml`)
-  - `install_java` (only if running jar directly on host)
-
-## Post-provision checklist on the VM
-
-1. Create `/opt/walks-server/.env` (from `/opt/walks-server/.env.example` or `ops/.env.example`).
-2. Upload repo `ops/` to `/opt/walks-server/ops` (or via CI/CD).
-3. Run first-time HTTPS issuance if using dockerized nginx:
-   - `cd /opt/walks-server/ops && ./scripts/init-letsencrypt.sh /opt/walks-server/.env`
+- Terraform/network/VM changes: `walks-infra`
+- App image/runtime/container deploy changes: `walks-server`
