@@ -177,9 +177,9 @@ jobs:
           ORACLE_USER: ${{ secrets.ORACLE_USER }}
           WALKS_DOMAIN: ${{ secrets.WALKS_DOMAIN }}
           WALKS_CERTBOT_EMAIL: ${{ secrets.WALKS_CERTBOT_EMAIL }}
-          WALKS_CONTENTFUL_GRAPHQL_URL: ${{ secrets.WALKS_CONTENTFUL_GRAPHQL_URL }}
-          WALKS_CONTENTFUL_SPACE_ID: ${{ secrets.WALKS_CONTENTFUL_SPACE_ID }}
-          WALKS_CONTENTFUL_ACCESS_TOKEN: ${{ secrets.WALKS_CONTENTFUL_ACCESS_TOKEN }}
+          CONTENTFUL_GRAPHQL_URL: ${{ secrets.WALKS_CONTENTFUL_GRAPHQL_URL }}
+          CONTENTFUL_SPACE_ID: ${{ secrets.WALKS_CONTENTFUL_SPACE_ID }}
+          CONTENTFUL_ACCESS_TOKEN: ${{ secrets.WALKS_CONTENTFUL_ACCESS_TOKEN }}
         run: |
           set -eu
 
@@ -188,7 +188,7 @@ jobs:
             exit 0
           fi
 
-          if [ -z "${WALKS_DOMAIN:-}" ] || [ -z "${WALKS_CERTBOT_EMAIL:-}" ] || [ -z "${WALKS_CONTENTFUL_SPACE_ID:-}" ] || [ -z "${WALKS_CONTENTFUL_ACCESS_TOKEN:-}" ]; then
+          if [ -z "${WALKS_DOMAIN:-}" ] || [ -z "${WALKS_CERTBOT_EMAIL:-}" ] || [ -z "${CONTENTFUL_SPACE_ID:-}" ] || [ -z "${CONTENTFUL_ACCESS_TOKEN:-}" ]; then
             echo "Missing one or more required secrets to create /opt/walks-server/.env:" >&2
             echo "  WALKS_DOMAIN, WALKS_CERTBOT_EMAIL, WALKS_CONTENTFUL_SPACE_ID, WALKS_CONTENTFUL_ACCESS_TOKEN" >&2
             echo "Alternatively, create /opt/walks-server/.env manually on the VM (see ops/.env.example)." >&2
@@ -204,9 +204,9 @@ jobs:
 
           # Write the env file without echoing secrets back into logs.
           {
-            printf 'CONTENTFUL_GRAPHQL_URL=%s\n' "${WALKS_CONTENTFUL_GRAPHQL_URL:-https://graphql.contentful.com/content/v1/spaces/}"
-            printf 'CONTENTFUL_SPACE_ID=%s\n' "$WALKS_CONTENTFUL_SPACE_ID"
-            printf 'CONTENTFUL_ACCESS_TOKEN=%s\n' "$WALKS_CONTENTFUL_ACCESS_TOKEN"
+            printf 'CONTENTFUL_GRAPHQL_URL=%s\n' "${CONTENTFUL_GRAPHQL_URL:-https://graphql.contentful.com/content/v1/spaces/}"
+            printf 'CONTENTFUL_SPACE_ID=%s\n' "$CONTENTFUL_SPACE_ID"
+            printf 'CONTENTFUL_ACCESS_TOKEN=%s\n' "$CONTENTFUL_ACCESS_TOKEN"
             printf 'CONTENTFUL_ENVIRONMENT=master\n'
             printf 'CONTENTFUL_DEFAULT_LOCALE=en-US\n'
             printf 'DOMAIN=%s\n' "$WALKS_DOMAIN"

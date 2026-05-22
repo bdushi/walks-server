@@ -3,6 +3,7 @@ services:
     image: ${APP_IMAGE}:${APP_TAG}
     restart: unless-stopped
     environment:
+      CONTENTFUL_GRAPHQL_URL: ${CONTENTFUL_GRAPHQL_URL:-https://graphql.contentful.com/content/v1/spaces/}
       CONTENTFUL_SPACE_ID: ${CONTENTFUL_SPACE_ID}
       CONTENTFUL_ACCESS_TOKEN: ${CONTENTFUL_ACCESS_TOKEN}
       CONTENTFUL_ENVIRONMENT: ${CONTENTFUL_ENVIRONMENT:-master}
